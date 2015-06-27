@@ -7,7 +7,7 @@ An animation class with start, current and end values, a duration and an easing 
 Animation doesn’t manipulate DOM elements directly. Listen to events from Animation and do what you like with the output — for example, move nodes on an SVG path, adjust the width of a DOM element, individually animate RGB components of a colour…
 
 ##Interpolator.js
-Interpolates between two numbers. Used by Animation to precalculate frames. Use ```Interpolator.interpolate()``` to calculate a single value somewhere between two numbers, or ```Interpolate.blend``` to get a whole bunch of values. You can pass in an easing equation for non-linear interpolation.
+Interpolates between two numbers. Used by Animation to precalculate frames. Use ```Interpolator.interpolate()``` to calculate a single value somewhere between two numbers, or ```Interpolator.blend``` to get a whole bunch of values. You can pass in an easing equation for non-linear interpolation.
 
 ##Easing.js
 Based on [Penner’s easing equations](http://robertpenner.com/easing/). 
