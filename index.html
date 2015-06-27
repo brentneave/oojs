@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <title>Hi</title>
+    <link rel='stylesheet' href='dist/css/screen.css' type='text/css' media='screen'>
+</head>
+<body>
+
+<!-- <div class='output component--text-block' style='width: 0px; background-color: black;'>0</div> -->
+
+<style type='text/css'>
+ .dot {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #00b9e4;
+ }
+</style>
+
+<script type='text/javascript' src='dist/js/site.js'></script>
+<script type='text/javascript'>
+
+var numDots = 6,
+    elements = [],
+    paused = false;
+
+function createIt() {
+  for(var i = 0; i < numDots; i++) {
+    var dot = document.createElement('div');
+    dot.classList.add('dot');
+    dot.style.left = (Math.random() * window.innerWidth) + 'px';
+    dot.style.top  = (Math.random() * window.innerHeight) + 'px';
+    document.body.appendChild(dot);
+    elements.push({
+      dot: dot,
+      animx: new Animation(0, 0, 1000, Easing.easeInOutQuad),
+      animy: new Animation(0, 0, 1000, Easing.easeInOutQuad)
+    });
+  }
+}
+
+function startIt() {
+  var i = elements.length;
+
+  while(i--) {
+    var dot = elements[i].dot,
+        animx = elements[i].animx,
+        animy = elements[i].animy;
+
+
+    animx.startValue(parseFloat(dot.style.left))
+         .endValue(Math.random() * window.innerWidth);
+
+    animy.startValue(parseFloat(dot.style.top))
+         .endValue(Math.random() * window.innerHeight);
+
+    var listener = {
+      dot: dot,
+      animx: animx,
+      animy: animy,
+      onEnterFrame: function() {
+        this.dot.style.left = this.animx.currentValue() + 'px';
+        this.dot.style.top  = this.animy.currentValue() + 'px';
+      },
+      onComplete: function() {
+        this.animx.startValue(this.animx.currentValue());
+        this.animy.startValue(this.animy.currentValue());
+        this.animx.endValue(Math.random() * window.innerWidth);
+        this.animy.endValue(Math.random() * window.innerHeight);
+        this.animx.rewind().play();
+        this.animy.rewind().play();
+      }
+    }
+
+    animx.onEnterFrame.addListener(listener, listener.onEnterFrame);
+    animy.onEnterFrame.addListener(listener, listener.onEnterFrame);
+    animx.onComplete.addListener(listener, listener.onComplete);
+    animx.play();
+    animy.play();
+  }
+}
+
+function pauseIt() {
+  var i = elements.length;
+
+  while(i--) {
+    elements[i].animx.pause();
+    elements[i].animy.pause();
+  }
+  paused = true;
+}
+
+function unPauseIt() {
+  var i = elements.length;
+
+  while(i--) {
+    elements[i].animx.play();
+    elements[i].animy.play();
+  }
+  paused = false;
+}
+
+createIt();
+startIt();
+
+function handleMouseDown(e) {
+  if(!paused) {
+    pauseIt();
+  } else {
+    unPauseIt();
+  }
+}
+window.addEventListener('mousedown', handleMouseDown, false);
+
+// var outputElement = document.querySelector('.output');
+// var anim = new Animation(0, 1000, 2000, Easing.easeOutBack),
+//     listener = {
+//       onEnterFrame: function(e) {
+//         outputElement.style.width = anim.currentValue() + 'px';
+//       }
+//     };
+// anim.onEnterFrame.addListener(listener, listener.onEnterFrame);
+// anim.play();
+
+</script>
+</body>
+</html>

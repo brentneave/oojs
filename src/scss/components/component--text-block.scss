@@ -1,0 +1,7 @@
+.component--text-block {
+  padding: 2rem 1.5rem;
+
+  @include breakpoint-5 {
+      padding: 4rem 1.5rem;
+  }
+}

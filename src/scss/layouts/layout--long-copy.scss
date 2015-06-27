@@ -1,0 +1,10 @@
+.layout--long-copy {
+  max-width: 36rem;
+  @include breakpoint-3 {
+    width: 75%;
+  }
+  @include breakpoint-5 {
+    width: 50%;
+    margin: 0 auto;
+  }
+}

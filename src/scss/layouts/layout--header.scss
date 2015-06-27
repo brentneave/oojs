@@ -1,0 +1,81 @@
+.layout--header {
+  background-color: $dark-grey;
+  overflow: hidden;
+  position: relative;
+  padding-top: percentage(2/3);
+
+  @include breakpoint-3 {
+    padding-top: 50%;
+  }
+
+  @include breakpoint-6 {
+    padding-top: 40%;
+  }
+
+  &:before {
+    z-index: 1;
+    background-color: $light-blue;
+    content: '';
+    display: block;
+    position: absolute;
+    right: 100%;
+    top: 0;
+    width: 100%;
+    padding-top: percentage(2/3);
+    transform: skewX(-25.3deg) translateX(6em);
+    transform-origin: top right;
+    @include breakpoint-3 {
+      transform: skewX(-25.3deg) translateX(50%);
+      transform-origin: center right;
+      padding-top: 50%;
+    }
+    @include breakpoint-6 {
+      padding-top: 40%;
+    }
+  }
+
+  &__image {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding-top: percentage(2/3);
+    overflow: hidden;
+
+    img {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      min-width: 100%;
+    }
+
+    @include breakpoint-3 {
+        width: 75%;
+        padding-top: 50%;
+        margin-left: 25%;
+    }
+
+    @include breakpoint-6 {
+        width: 60%;
+        padding-top: 40%;
+        margin-left: 40%;
+    }
+  }
+
+  &__text {
+    position: relative;
+    z-index: 2;
+    background-color: $light-grey;
+    -webkit-font-smoothing: antialiased;
+
+    @include breakpoint-3 {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 75%;
+      transform: translateY(-50%);
+      background-color: transparent;
+    }
+  }
+
+}

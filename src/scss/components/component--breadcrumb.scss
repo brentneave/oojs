@@ -1,0 +1,14 @@
+.component--breadcrumb {
+  &:after {
+    content: '';
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: -.2em;
+    margin-left: .5rem;
+    width: 1px;
+    height: 1em;
+    border-radius: .5px;
+    transform: rotate(25.3deg);
+    background-color: transparentize($dark-grey, .5);
+  }
+}
