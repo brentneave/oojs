@@ -16,7 +16,7 @@ Based on [Penner’s easing equations](http://robertpenner.com/easing/).
 Broadcasts events. Use one Broadcaster per type of Event you want to fire. That might seem wasteful, but I find ```this.onSomethingChanged.broadcast()``` easier to debug than ```this.broadcast('onSomethingChanged')``` because you’ll get an error if you type the name of the event incorrectly.
 
 ##Event.js
-An event with a source and some data. Passed as an argument to ```Broadcaster.broadcast```.
+An event with a source and some data. Passed as an argument to ```Broadcaster.broadcast```. For now this is just a container for arbitrary data but in future could be extended to have particular properties.
 
 ##AnimationBinding.js
 A quick way to hook up an animation to any property of any object. Listens for the current frame of the Animation and changes a property on a third object based on that.
