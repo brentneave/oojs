@@ -1,8 +1,8 @@
 Easing =
 {
-	none : function(t, b, c, d) {
-	    return c * t / d + b;
-	},
+  none : function(t, b, c, d) {
+      return c * t / d + b;
+  },
     easeInQuad: function (t, b, c, d) {
         return c*(t/=d)*t + b;
     },
