@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<!-- <div class='output component--text-block' style='width: 0px; background-color: black;'>0</div> -->
+<h1 class='message'>Go.</h1>
 
 <style type='text/css'>
  .dot {
@@ -18,6 +18,12 @@
   border-radius: 50%;
   background-color: #00b9e4;
  }
+ .message {
+  position: absolute;
+  top: 50%;
+  text-align: center;
+  width: 100%;
+ }
 </style>
 
 <script type='text/javascript' src='dist/js/site.js'></script>
@@ -25,7 +31,15 @@
 
 var numDots = 6,
     elements = [],
-    paused = false;
+    paused = false,
+    colors = [
+      '#D0021B',
+      '#F5A623',
+      '#fe0',
+      '#4A90E2',
+      '#B8E986',
+      '#50E3C2'
+    ];
 
 function createIt() {
   for(var i = 0; i < numDots; i++) {
@@ -33,6 +47,7 @@ function createIt() {
     dot.classList.add('dot');
     dot.style.left = (Math.random() * window.innerWidth) + 'px';
     dot.style.top  = (Math.random() * window.innerHeight) + 'px';
+    dot.style.backgroundColor  = colors[i];
     document.body.appendChild(dot);
     elements.push({
       dot: dot,
@@ -86,15 +101,20 @@ function startIt() {
 function pauseIt() {
   var i = elements.length;
 
+  document.querySelector('.message').textContent = 'Go.';
+
   while(i--) {
     elements[i].animx.pause();
     elements[i].animy.pause();
   }
+
   paused = true;
 }
 
 function unPauseIt() {
   var i = elements.length;
+
+  document.querySelector('.message').textContent = 'Stop.';
 
   while(i--) {
     elements[i].animx.play();
@@ -105,6 +125,7 @@ function unPauseIt() {
 
 createIt();
 startIt();
+pauseIt();
 
 function handleMouseDown(e) {
   if(!paused) {
@@ -114,6 +135,7 @@ function handleMouseDown(e) {
   }
 }
 window.addEventListener('mousedown', handleMouseDown, false);
+window.addEventListener('touchend', handleMouseDown, false);
 
 // var outputElement = document.querySelector('.output');
 // var anim = new Animation(0, 1000, 2000, Easing.easeOutBack),
