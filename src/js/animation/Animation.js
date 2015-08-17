@@ -1,7 +1,7 @@
 function Animation(start, end, duration, easingFunction) {
 
-  if(start    !== parseFloat(start))         { throw new Error(); }
-  if(end      !== parseFloat(end))           { throw new Error(); }
+  if(start     !== parseFloat(start))         { throw new Error(); }
+  if(end       !== parseFloat(end))           { throw new Error(); }
   if(duration !== parseFloat(duration))      { throw new Error(); }
   if(!(easingFunction instanceof Function))  { throw new Error(); }
 
@@ -18,8 +18,8 @@ function Animation(start, end, duration, easingFunction) {
   this.onEnterFrame    = new Broadcaster();
   this.onPlay          = new Broadcaster();
   this.onPlayBackwards = new Broadcaster();
-  this.onPause         = new Broadcaster();
-  this.onComplete      = new Broadcaster();
+  this.onPause          = new Broadcaster();
+  this.onComplete       = new Broadcaster();
 
   var _recalculate = function() {
     var numFrames = Math.round(_duration/_frameLength);
@@ -57,8 +57,6 @@ function Animation(start, end, duration, easingFunction) {
 
   this.play = function() {
 
-    cancelAnimationFrame(_animationFrameID);
-
     this.nextFrame(true);
 
     this.onPlay.broadcast(
@@ -75,8 +73,6 @@ function Animation(start, end, duration, easingFunction) {
   }
 
   this.playBackwards = function() {
-
-    cancelAnimationFrame(_animationFrameID);
 
     if(_currentFrame == 0) _currentFrame = _values.length - 1;
 
@@ -111,21 +107,22 @@ function Animation(start, end, duration, easingFunction) {
   }
 
   this.rewind = function() {
-    cancelAnimationFrame(_animationFrameID);
     this.currentFrame(0);
     return this;
   }
 
   this.fastForward = function()
   {
-    cancelAnimationFrame(_animationFrameID);
     this.currentFrame(_values.length - 1);
     return this;
   }
 
   this.nextFrame = function(repeat)
   {
-  	if(repeat) _animationFrameID = requestAnimationFrame(this.nextFrame);
+
+  	if(repeat) {
+      _animationFrameID = requestAnimationFrame(this.nextFrame.bind(this));
+    }
 
     this.currentFrame(_currentFrame + 1);
 
@@ -138,9 +135,11 @@ function Animation(start, end, duration, easingFunction) {
     return this;
   }
 
-  this.prevFrame = function()
+  this.prevFrame = function(repeat)
   {
-  	if(repeat) _animationFrameID = requestAnimationFrame(this.prevFrame);
+  	if(repeat) {
+      _animationFrameID = requestAnimationFrame(this.prevFrame.bind(this));
+    }
 
     this.currentFrame(_currentFrame - 1);
 

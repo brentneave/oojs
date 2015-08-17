@@ -97,11 +97,11 @@ function startIt() {
       }
     }
 
-    animx.onEnterFrame.addListener(listener, listener.onEnterFrame);
+    // animx.onEnterFrame.addListener(listener, listener.onEnterFrame);
     animy.onEnterFrame.addListener(listener, listener.onEnterFrame);
-    animx.onComplete.addListener(listener, listener.onComplete);
-    animx.playBackwards();
-    animy.playBackwards();
+    animy.onComplete.addListener(listener, listener.onComplete);
+    animx.play();
+    animy.play();
   }
 }
 
@@ -124,8 +124,8 @@ function unPauseIt() {
   document.querySelector('.message').textContent = 'Stop.';
 
   while(i--) {
-    elements[i].animx.playBackwards();
-    elements[i].animy.playBackwards();
+    elements[i].animx.play();
+    elements[i].animy.play();
   }
   paused = false;
 }
