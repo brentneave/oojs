@@ -1,12 +1,12 @@
 function Animation(start, end, duration, easingFunction) {
 
-  if(start    !== parseFloat(start))         { throw new Error(); }
-  if(end      !== parseFloat(end))           { throw new Error(); }
+  if(start     !== parseFloat(start))         { throw new Error(); }
+  if(end       !== parseFloat(end))           { throw new Error(); }
   if(duration !== parseFloat(duration))      { throw new Error(); }
   if(!(easingFunction instanceof Function))  { throw new Error(); }
 
   var that = this,
-    _animationFrameID,
+    _interval,
     _currentFrame = 0,
     _start = start,
     _end = end,
@@ -18,8 +18,8 @@ function Animation(start, end, duration, easingFunction) {
   this.onEnterFrame    = new Broadcaster();
   this.onPlay          = new Broadcaster();
   this.onPlayBackwards = new Broadcaster();
-  this.onPause         = new Broadcaster();
-  this.onComplete      = new Broadcaster();
+  this.onPause          = new Broadcaster();
+  this.onComplete       = new Broadcaster();
 
   var _recalculate = function() {
     var numFrames = Math.round(_duration/_frameLength);
@@ -57,9 +57,15 @@ function Animation(start, end, duration, easingFunction) {
 
   this.play = function() {
 
-    cancelAnimationFrame(_animationFrameID);
+    clearInterval(_interval);
 
-    this.nextFrame(true);
+    var that = this;
+    _interval = setInterval(
+      function() {
+        that.nextFrame();
+      },
+      _frameLength
+    );
 
     this.onPlay.broadcast(
       new Event(
@@ -76,7 +82,7 @@ function Animation(start, end, duration, easingFunction) {
 
   this.playBackwards = function() {
 
-    cancelAnimationFrame(_animationFrameID);
+    clearInterval(_interval);
 
     if(_currentFrame == 0) _currentFrame = _values.length - 1;
 
@@ -97,7 +103,7 @@ function Animation(start, end, duration, easingFunction) {
 
   this.pause = function()
   {
-    cancelAnimationFrame(_animationFrameID);
+    clearInterval(_interval);
     this.onPause.broadcast(
       new Event(
         this,
@@ -111,19 +117,17 @@ function Animation(start, end, duration, easingFunction) {
   }
 
   this.rewind = function() {
-    cancelAnimationFrame(_animationFrameID);
     this.currentFrame(0);
     return this;
   }
 
   this.fastForward = function()
   {
-    cancelAnimationFrame(_animationFrameID);
     this.currentFrame(_values.length - 1);
     return this;
   }
 
-  this.nextFrame = function(repeat)
+  this.nextFrame = function()
   {
     if(repeat) _animationFrameID = requestAnimationFrame(this.nextFrame);
 
@@ -131,7 +135,7 @@ function Animation(start, end, duration, easingFunction) {
 
     if(_currentFrame == _values.length - 1)
     {
-      cancelAnimationFrame(_animationFrameID);
+      clearInterval(_interval);
       this.onComplete.broadcast(new Event(this, {}));
     }
 
@@ -145,7 +149,7 @@ function Animation(start, end, duration, easingFunction) {
     this.currentFrame(_currentFrame - 1);
 
     if(_currentFrame == 0) {
-      cancelAnimationFrame(_animationFrameID);
+      clearInterval(_interval);
       this.onComplete.broadcast(new Event(this, {}));
     }
 
