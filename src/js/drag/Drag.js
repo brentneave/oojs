@@ -1,4 +1,4 @@
-function Drag(element, options) {
+function Drag(element, classNameWhileDragging) {
 
   // private vars
 
@@ -8,19 +8,24 @@ function Drag(element, options) {
       _pointerx,
       _pointery,
       _translatex = 0,
-      _translatey = 0;
+      _translatey = 0,
+      _draggingClassName;
 
   // broadcasters
 
-  this.onStartDrag = new Broadcaster();
-  this.onDrag      = new Broadcaster();
-  this.onEndDrag   = new Broadcaster();
+  this.onSetElement = new Broadcaster();
+  this.onStartDrag  = new Broadcaster();
+  this.onDrag       = new Broadcaster();
+  this.onEndDrag    = new Broadcaster();
 
   // private methods
 
   var _startDragAt = function(x, y) {
     _pointerx = x;
     _pointery = y;
+
+    if(_draggingClassName) _element.classList.add(_draggingClassName);
+
     that.onStartDrag.broadcast(new Signal(this, { x: _pointerx, y: _pointery }));
   }
 
@@ -31,13 +36,13 @@ function Drag(element, options) {
     _pointery = y;
 
     _element.style.transform =
-    _element.style.webkitTransform =
-    'translate3d(' + _translatex + 'px, ' + _translatey + 'px, 0)';
+    _element.style.webkitTransform = 'translate3d(' + _translatex + 'px, ' + _translatey + 'px, 0)';
 
     that.onDrag.broadcast(new Signal(this, { x: _pointerx, y: _pointery }));
   }
 
   var _endDrag = function() {
+    _element.classList.remove(_draggingClassName);
     that.onDrag.broadcast(new Signal(this, { x: _pointerx, y: _pointery }));
   }
 
@@ -89,10 +94,11 @@ function Drag(element, options) {
 
 
   // getter/setters
-  // 
+
   this.element = function(element) {
       if(element instanceof HTMLElement) {
       _element = element;
+      this.onSetElement.broadcast(new Signal(this, { element: _element }));
       this.enableDrag();
       return this;
     }
@@ -102,7 +108,21 @@ function Drag(element, options) {
     return _element;
   }
 
-  this.element(element);
+  this.classNameWhileDragging = function(s) {
+      if(s.toString() === s) {
+      _draggingClassName = s;
+      return this;
+    }
+    else if (arguments.length) {
+      throw new Error();
+    }
+    return _draggingClassName;
+  }
+
+  // initialise it
+
+  if(classNameWhileDragging) this.classNameWhileDragging(classNameWhileDragging);
+  if(element) this.element(element);
 
 }
 
