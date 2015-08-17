@@ -18,8 +18,8 @@ function Animation(start, end, duration, easingFunction) {
   this.onEnterFrame    = new Broadcaster();
   this.onPlay          = new Broadcaster();
   this.onPlayBackwards = new Broadcaster();
-  this.onPause          = new Broadcaster();
-  this.onComplete       = new Broadcaster();
+  this.onPause         = new Broadcaster();
+  this.onComplete      = new Broadcaster();
 
   var _recalculate = function() {
     var numFrames = Math.round(_duration/_frameLength);

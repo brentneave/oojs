@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <title>Hi</title>
+    <link rel='stylesheet' href='dist/css/screen.css' type='text/css' media='screen'>
+</head>
+<body>
+
+<style type='text/css'>
+
+ .message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -3rem;
+  margin-left: -3rem;
+  width: 6rem;
+  height: 6rem;
+  background-color: yellow;
+  text-align: center;
+  line-height: 6rem;
+  font-size: 16px;
+  border-radius: 50%;
+ }
+</style>
+<h1 class='message'>Touch me.</h1>
+
+<script type='text/javascript' src='dist/js/site.js'></script>
+<script type='text/javascript'>
+var dragger = new Drag(document.querySelector('.message'));
+</script>
+</body>
+</html>
