@@ -78,6 +78,8 @@ function Animation(start, end, duration, easingFunction) {
 
     cancelAnimationFrame(_animationFrameID);
 
+    if(_currentFrame == 0) _currentFrame = _values.length - 1;
+
     this.prevFrame(true);
 
     this.onPlayBackwards.broadcast(
