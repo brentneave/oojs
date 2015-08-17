@@ -97,9 +97,9 @@ function startIt() {
       }
     }
 
-    animx.onEnterFrame.addListener(listener, listener.onEnterFrame);
+    // animx.onEnterFrame.addListener(listener, listener.onEnterFrame);
     animy.onEnterFrame.addListener(listener, listener.onEnterFrame);
-    animx.onComplete.addListener(listener, listener.onComplete);
+    animy.onComplete.addListener(listener, listener.onComplete);
     animx.play();
     animy.play();
   }
