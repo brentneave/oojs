@@ -11,12 +11,16 @@
 <h1 class='message'>Go.</h1>
 
 <style type='text/css'>
+  html {
+    overflow: hidden;
+  }
  .dot {
   position: absolute;
   width: 30px;
   height: 30px;
   border-radius: 50%;
   background-color: #00b9e4;
+  -webkit-transform: translate3d(0,0,0);
  }
  .message {
   position: absolute;
@@ -44,11 +48,13 @@ var numDots = 6,
 
 function createIt() {
   for(var i = 0; i < numDots; i++) {
-    var dot = document.createElement('div');
+    var dot = document.createElement('div'),
+        x = Math.random() * window.innerWidth;
+        y = Math.random() * window.innerHeight;
     dot.classList.add('dot');
-    dot.style.left = (Math.random() * window.innerWidth) + 'px';
-    dot.style.top  = (Math.random() * window.innerHeight) + 'px';
-    dot.style.backgroundColor  = colors[i];
+    dot.style.left = x + 'px';
+    dot.style.top  = y + 'px';
+    dot.style.backgroundColor  = colors[i%colors.length];
     document.body.appendChild(dot);
     elements.push({
       dot: dot,
@@ -66,7 +72,6 @@ function startIt() {
         animx = elements[i].animx,
         animy = elements[i].animy;
 
-
     animx.startValue(parseFloat(dot.style.left))
          .endValue(Math.random() * window.innerWidth);
 
@@ -78,6 +83,7 @@ function startIt() {
       animx: animx,
       animy: animy,
       onEnterFrame: function() {
+        // this.dot.style.webkitTransform = 'translate3D(' + this.animx.currentValue() +'px, ' + this.animy.currentValue() + 'px, 0)';
         this.dot.style.left = this.animx.currentValue() + 'px';
         this.dot.style.top  = this.animy.currentValue() + 'px';
       },
@@ -94,8 +100,8 @@ function startIt() {
     animx.onEnterFrame.addListener(listener, listener.onEnterFrame);
     animy.onEnterFrame.addListener(listener, listener.onEnterFrame);
     animx.onComplete.addListener(listener, listener.onComplete);
-    animx.play();
-    animy.play();
+    animx.playBackwards();
+    animy.playBackwards();
   }
 }
 
@@ -118,8 +124,8 @@ function unPauseIt() {
   document.querySelector('.message').textContent = 'Stop.';
 
   while(i--) {
-    elements[i].animx.play();
-    elements[i].animy.play();
+    elements[i].animx.playBackwards();
+    elements[i].animy.playBackwards();
   }
   paused = false;
 }
