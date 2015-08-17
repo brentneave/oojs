@@ -2,7 +2,7 @@
 Some object oriented Javascript. Just for fun and learning.
 
 ##Animation.js
-An animation class with start, current and end values, a duration and an easing equation. It precalculates each frame then scrubs through them over time. Because of this behaviour, it’ll slow down its frame rate rather than drop frames — not sure if that’s a feature or a bug!
+An animation class with start, current and end values, a duration and an easing equation. It precalculates each frame then scrubs through them over time using requestAnimationFrame.
 
 Animation doesn’t manipulate DOM elements directly. Listen to events from Animation and do what you like with the output — for example, move nodes on an SVG path, adjust the width of a DOM element, individually animate RGB components of a colour…
 
