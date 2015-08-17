@@ -127,13 +127,10 @@ function Animation(start, end, duration, easingFunction) {
     return this;
   }
 
-  this.nextFrame = function()
+  this.nextFrame = function(repeat)
   {
-<<<<<<< HEAD
-    if(repeat) _animationFrameID = requestAnimationFrame(this.nextFrame);
-=======
+
   	if(repeat) _animationFrameID = requestAnimationFrame(this.nextFrame.bind(this));
->>>>>>> requestAnimationFrame
 
     this.currentFrame(_currentFrame + 1);
 
@@ -146,13 +143,9 @@ function Animation(start, end, duration, easingFunction) {
     return this;
   }
 
-  this.prevFrame = function()
+  this.prevFrame = function(repeat)
   {
-<<<<<<< HEAD
-    if(repeat) _animationFrameID = requestAnimationFrame(this.prevFrame);
-=======
-  	if(repeat) _animationFrameID = requestAnimationFrame(this.nextFrame.bind(this));
->>>>>>> requestAnimationFrame
+  	if(repeat) _animationFrameID = requestAnimationFrame(this.prevFrame.bind(this));
 
     this.currentFrame(_currentFrame - 1);
 
