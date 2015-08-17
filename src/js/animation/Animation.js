@@ -6,7 +6,7 @@ function Animation(start, end, duration, easingFunction) {
   if(!(easingFunction instanceof Function))  { throw new Error(); }
 
   var that = this,
-    _interval,
+    _animationFrameID,
     _currentFrame = 0,
     _start = start,
     _end = end,
@@ -57,15 +57,7 @@ function Animation(start, end, duration, easingFunction) {
 
   this.play = function() {
 
-    clearInterval(_interval);
-
-    var that = this;
-    _interval = setInterval(
-      function() {
-        that.nextFrame();
-      },
-      _frameLength
-    );
+    this.nextFrame(true);
 
     this.onPlay.broadcast(
       new Event(
@@ -81,8 +73,6 @@ function Animation(start, end, duration, easingFunction) {
   }
 
   this.playBackwards = function() {
-
-    clearInterval(_interval);
 
     if(_currentFrame == 0) _currentFrame = _values.length - 1;
 
@@ -103,7 +93,7 @@ function Animation(start, end, duration, easingFunction) {
 
   this.pause = function()
   {
-    clearInterval(_interval);
+    cancelAnimationFrame(_animationFrameID);
     this.onPause.broadcast(
       new Event(
         this,
@@ -130,13 +120,15 @@ function Animation(start, end, duration, easingFunction) {
   this.nextFrame = function(repeat)
   {
 
-  	if(repeat) _animationFrameID = requestAnimationFrame(this.nextFrame.bind(this));
+  	if(repeat) {
+      _animationFrameID = requestAnimationFrame(this.nextFrame.bind(this));
+    }
 
     this.currentFrame(_currentFrame + 1);
 
     if(_currentFrame == _values.length - 1)
     {
-      clearInterval(_interval);
+      cancelAnimationFrame(_animationFrameID);
       this.onComplete.broadcast(new Event(this, {}));
     }
 
@@ -145,12 +137,14 @@ function Animation(start, end, duration, easingFunction) {
 
   this.prevFrame = function(repeat)
   {
-  	if(repeat) _animationFrameID = requestAnimationFrame(this.prevFrame.bind(this));
+  	if(repeat) {
+      _animationFrameID = requestAnimationFrame(this.prevFrame.bind(this));
+    }
 
     this.currentFrame(_currentFrame - 1);
 
     if(_currentFrame == 0) {
-      clearInterval(_interval);
+      cancelAnimationFrame(_animationFrameID);
       this.onComplete.broadcast(new Event(this, {}));
     }
 
