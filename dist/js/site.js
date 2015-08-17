@@ -2,8 +2,8 @@ function Animation(start, end, duration, easingFunction) {
 
   if(start     !== parseFloat(start))         { throw new Error(); }
   if(end       !== parseFloat(end))           { throw new Error(); }
-  if(duration !== parseFloat(duration))      { throw new Error(); }
-  if(!(easingFunction instanceof Function))  { throw new Error(); }
+  if(duration  !== parseFloat(duration))      { throw new Error(); }
+  if(!(easingFunction instanceof Function))   { throw new Error(); }
 
   var that = this,
     _animationFrameID,
@@ -37,7 +37,7 @@ function Animation(start, end, duration, easingFunction) {
       if(n > _values.length - 1) n = _values.length - 1;
       _currentFrame = n;
       this.onEnterFrame.broadcast(
-        new Event(
+        new Signal(
           this,
           {
             frame: _currentFrame,
@@ -60,7 +60,7 @@ function Animation(start, end, duration, easingFunction) {
     this.nextFrame(true);
 
     this.onPlay.broadcast(
-      new Event(
+      new Signal(
         this,
         {
           frame: _currentFrame,
@@ -79,7 +79,7 @@ function Animation(start, end, duration, easingFunction) {
     this.prevFrame(true);
 
     this.onPlayBackwards.broadcast(
-      new Event(
+      new Signal(
         this,
         {
           frame: _currentFrame,
@@ -95,7 +95,7 @@ function Animation(start, end, duration, easingFunction) {
   {
     cancelAnimationFrame(_animationFrameID);
     this.onPause.broadcast(
-      new Event(
+      new Signal(
         this,
         {
           frame: _currentFrame,
@@ -129,7 +129,7 @@ function Animation(start, end, duration, easingFunction) {
     if(_currentFrame == _values.length - 1)
     {
       cancelAnimationFrame(_animationFrameID);
-      this.onComplete.broadcast(new Event(this, {}));
+      this.onComplete.broadcast(new Signal(this, {}));
     }
 
     return this;
@@ -145,7 +145,7 @@ function Animation(start, end, duration, easingFunction) {
 
     if(_currentFrame == 0) {
       cancelAnimationFrame(_animationFrameID);
-      this.onComplete.broadcast(new Event(this, {}));
+      this.onComplete.broadcast(new Signal(this, {}));
     }
 
     return this;
@@ -447,7 +447,7 @@ function Broadcaster()
   }
 
   this.broadcast = function(e) {
-    if(!(e instanceof Event))
+    if(!(e instanceof Signal))
     {
       throw new Error();
     }
@@ -465,7 +465,7 @@ function Broadcaster()
 
   return this;
 }
-function Event(source, data)
+function Signal(source, data)
 {
   var _source,
       _data;
@@ -501,6 +501,6 @@ function Event(source, data)
   return this;
 }
 
-Event.prototype.toString = function() {
-  return '[Event]';
+Signal.prototype.toString = function() {
+  return '[Signal]';
 }

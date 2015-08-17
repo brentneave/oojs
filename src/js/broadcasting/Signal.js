@@ -1,4 +1,4 @@
-function Event(source, data)
+function Signal(source, data)
 {
   var _source,
       _data;
@@ -34,6 +34,6 @@ function Event(source, data)
   return this;
 }
 
-Event.prototype.toString = function() {
-  return '[Event]';
+Signal.prototype.toString = function() {
+  return '[Signal]';
 }
