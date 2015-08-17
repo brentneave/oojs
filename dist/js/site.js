@@ -1,243 +1,237 @@
 function Animation(start, end, duration, easingFunction) {
 
-	if(start 		!== parseFloat(start))	 			{ throw new Error(); }
-	if(end   		!== parseFloat(end))	 				{ throw new Error(); }
-	if(duration !== parseFloat(duration))			{ throw new Error(); }
-	if(!(easingFunction instanceof Function))	{ throw new Error(); }
+  if(start    !== parseFloat(start))         { throw new Error(); }
+  if(end      !== parseFloat(end))           { throw new Error(); }
+  if(duration !== parseFloat(duration))      { throw new Error(); }
+  if(!(easingFunction instanceof Function))  { throw new Error(); }
 
-	var that = this,
-		_interval,
-		_currentFrame = 0,
-		_start = start,
-		_end = end,
-		_values,
-		_duration = duration,
-		_easingFunction = easingFunction,
-		_frameLength = 1000/100;
+  var that = this,
+    _animationFrameID,
+    _currentFrame = 0,
+    _start = start,
+    _end = end,
+    _values,
+    _duration = duration,
+    _easingFunction = easingFunction,
+    _frameLength = 1000/100;
 
-	this.onEnterFrame 	 = new Broadcaster();
-	this.onPlay 				 = new Broadcaster();
-	this.onPlayBackwards = new Broadcaster();
-	this.onPause 				 = new Broadcaster();
-	this.onComplete			 = new Broadcaster();
+  this.onEnterFrame    = new Broadcaster();
+  this.onPlay          = new Broadcaster();
+  this.onPlayBackwards = new Broadcaster();
+  this.onPause         = new Broadcaster();
+  this.onComplete      = new Broadcaster();
 
-	var _recalculate = function() {
-		var numFrames = Math.round(_duration/_frameLength);
-		_values = Interpolator.blend(_start, _end, numFrames, _easingFunction);
-	}
+  var _recalculate = function() {
+    var numFrames = Math.round(_duration/_frameLength);
+    _values = Interpolator.blend(_start, _end, numFrames, _easingFunction);
+  }
 
-	_recalculate();
+  _recalculate();
 
-	this.currentFrame = function(n)
-	{
-		if(!isNaN(n))
-		{
-			if(n < 0) { n = 0; }
-			else
-			if(n > _values.length - 1) n = _values.length - 1;
-			_currentFrame = n;
-			this.onEnterFrame.broadcast(
-				new Event(
-					this,
-					{
-						frame: _currentFrame,
-						value: _values[_currentFrame]
-					}
-				)
-			);
+  this.currentFrame = function(n)
+  {
+    if(!isNaN(n))
+    {
+      if(n < 0) { n = 0; }
+      else
+      if(n > _values.length - 1) n = _values.length - 1;
+      _currentFrame = n;
+      this.onEnterFrame.broadcast(
+        new Event(
+          this,
+          {
+            frame: _currentFrame,
+            value: _values[_currentFrame]
+          }
+        )
+      );
 
-			return this;
-		}
-		else if(arguments.length)
-		{
-			throw new Error();
-		}
-		return _currentFrame;
-	}
+      return this;
+    }
+    else if(arguments.length)
+    {
+      throw new Error();
+    }
+    return _currentFrame;
+  }
 
-	this.play = function() {
+  this.play = function() {
 
-		clearInterval(_interval);
+    cancelAnimationFrame(_animationFrameID);
 
-		var that = this;
-		_interval = setInterval(
-			function() {
-				that.nextFrame();
-			},
-			_frameLength
-		);
+    this.nextFrame(true);
 
-		this.onPlay.broadcast(
-			new Event(
-				this,
-				{
-					frame: _currentFrame,
-					value: this.currentValue()
-				}
-			)
-		);
+    this.onPlay.broadcast(
+      new Event(
+        this,
+        {
+          frame: _currentFrame,
+          value: this.currentValue()
+        }
+      )
+    );
 
-		return this;
-	}
+    return this;
+  }
 
-	this.playBackwards = function() {
+  this.playBackwards = function() {
 
-		clearInterval(_interval);
+    cancelAnimationFrame(_animationFrameID);
 
-		var that = this;
-		_interval = setInterval(
-			function() {
-				that.prevFrame();
-			},
-			_frameLength
-		);
+    this.prevFrame(true);
 
-		this.onPlayBackwards.broadcast(
-			new Event(
-				this,
-				{
-					frame: _currentFrame,
-					value: this.currentValue()
-				}
-			)
-		);
+    this.onPlayBackwards.broadcast(
+      new Event(
+        this,
+        {
+          frame: _currentFrame,
+          value: this.currentValue()
+        }
+      )
+    );
 
-		return this;
-	}
+    return this;
+  }
 
-	this.pause = function()
-	{
-		clearInterval(_interval);
-		this.onPause.broadcast(
-			new Event(
-				this,
-				{
-					frame: _currentFrame,
-					value: this.currentValue()
-				}
-			)
-		);
-		return this;
-	}
+  this.pause = function()
+  {
+    cancelAnimationFrame(_animationFrameID);
+    this.onPause.broadcast(
+      new Event(
+        this,
+        {
+          frame: _currentFrame,
+          value: this.currentValue()
+        }
+      )
+    );
+    return this;
+  }
 
-	this.rewind = function() {
-		this.currentFrame(0);
-		return this;
-	}
+  this.rewind = function() {
+    cancelAnimationFrame(_animationFrameID);
+    this.currentFrame(0);
+    return this;
+  }
 
-	this.fastForward = function()
-	{
-		this.currentFrame(_values.length - 1);
-		return this;
-	}
+  this.fastForward = function()
+  {
+    cancelAnimationFrame(_animationFrameID);
+    this.currentFrame(_values.length - 1);
+    return this;
+  }
 
-	this.nextFrame = function()
-	{
-		this.currentFrame(_currentFrame + 1);
+  this.nextFrame = function(repeat)
+  {
+  	if(repeat) _animationFrameID = requestAnimationFrame(this.nextFrame.bind(this));
 
-		if(_currentFrame == _values.length - 1)
-		{
-			clearInterval(_interval);
-			this.onComplete.broadcast(new Event(this, {}));
-		}
+    this.currentFrame(_currentFrame + 1);
 
-		return this;
-	}
+    if(_currentFrame == _values.length - 1)
+    {
+      cancelAnimationFrame(_animationFrameID);
+      this.onComplete.broadcast(new Event(this, {}));
+    }
 
-	this.prevFrame = function()
-	{
-		this.currentFrame(_currentFrame - 1);
+    return this;
+  }
 
-		if(_currentFrame == 0) {
-			clearInterval(_interval);
-			this.onComplete.broadcast(new Event(this, {}));
-		}
+  this.prevFrame = function()
+  {
+  	if(repeat) _animationFrameID = requestAnimationFrame(this.nextFrame.bind(this));
 
-		return this;
-	}
+    this.currentFrame(_currentFrame - 1);
 
-	this.currentValue = function() {
-		return _values[_currentFrame];
-	}
+    if(_currentFrame == 0) {
+      cancelAnimationFrame(_animationFrameID);
+      this.onComplete.broadcast(new Event(this, {}));
+    }
 
-	this.values = function() {
-		return _values.splice();
-	}
+    return this;
+  }
 
-	this.startValue = function(n) {
-		if(!isNaN(n)) {
-			_start = n;
-			_recalculate();
-			return this;
-		}
-		else if (arguments.length) throw new Error();
-		return _start;
-	}
+  this.currentValue = function() {
+    return _values[_currentFrame];
+  }
 
-	this.endValue = function(n)	{
-		if(!isNaN(n)) {
-			_end = n;
-			_recalculate();
-			return this;
-		}
-		else if (arguments.length) throw new Error();
-		return _end;
-	}
+  this.values = function() {
+    return _values.splice();
+  }
 
-	this.easingFunction = function(f) {
-		if(arguments.length) {
-			if(f instanceof Function) {
-				_easingFunction = f;
-				_recalculate();
-				return this;
-			}
-			else { throw new Error(); }
-		}
+  this.startValue = function(n) {
+    if(!isNaN(n)) {
+      _start = n;
+      _recalculate();
+      return this;
+    }
+    else if (arguments.length) throw new Error();
+    return _start;
+  }
 
-		return _easingFunction;
-	}
+  this.endValue = function(n)  {
+    if(!isNaN(n)) {
+      _end = n;
+      _recalculate();
+      return this;
+    }
+    else if (arguments.length) throw new Error();
+    return _end;
+  }
 
-	return this;
+  this.easingFunction = function(f) {
+    if(arguments.length) {
+      if(f instanceof Function) {
+        _easingFunction = f;
+        _recalculate();
+        return this;
+      }
+      else { throw new Error(); }
+    }
+
+    return _easingFunction;
+  }
+
+  return this;
 }
 
 Animation.prototype.toString = function()
 {
-	return '[Animation]';
+  return '[Animation]';
 }
 
 function AnimationBinding(animation, object, getterSetterMethod) {
 
-	if(!(animation instanceof Animation)) 				throw new Error();
-	if(!(object instanceof Object)) 							throw new Error();
-	if(!(getterSetterMethod instanceof Function)) throw new Error();
+  if(!(animation instanceof Animation))         throw new Error();
+  if(!(object instanceof Object))               throw new Error();
+  if(!(getterSetterMethod instanceof Function)) throw new Error();
 
-	var _animation = animation,
-			_object = object,
-			_getterSetterMethod = getterSetterMethod;
+  var _animation = animation,
+      _object = object,
+      _getterSetterMethod = getterSetterMethod;
 
-	var _update = function() {
-		_getterSetterMethod.apply(_object, [_animation.currentValue()]);
-	}
+  var _update = function() {
+    _getterSetterMethod.apply(_object, [_animation.currentValue()]);
+  }
 
-	var _request = function() {
-		requestAnimationFrame(_update);
-	}
+  var _request = function() {
+    requestAnimationFrame(_update);
+  }
 
-	this.unbind = function() {
-		_animation.onEnterFrame.removeListener(this, _request);
-	}
+  this.unbind = function() {
+    _animation.onEnterFrame.removeListener(this, _request);
+  }
 
-	this.bind = function() {
-		_animation.onEnterFrame.addListener(this, _request);
-	}
+  this.bind = function() {
+    _animation.onEnterFrame.addListener(this, _request);
+  }
 
-	this.bind();
+  this.bind();
 }
 Easing =
 {
-	none : function(t, b, c, d) {
-	    return c * t / d + b;
-	},
+  none : function(t, b, c, d) {
+      return c * t / d + b;
+  },
     easeInQuad: function (t, b, c, d) {
         return c*(t/=d)*t + b;
     },
@@ -365,110 +359,110 @@ Easing =
 }
 var Interpolator =
 {
-	interpolate : function(start, end, numSteps, step, easingFunction) {
-		if(easingFunction == undefined) easingFunction  = Easing.none;
+  interpolate : function(start, end, numSteps, step, easingFunction) {
+    if(easingFunction == undefined) easingFunction  = Easing.none;
 
-		var t = step, // time, or current step
-			b = start, // start value
-			c = end - start, // total change in value
-			d = numSteps + 1; // duration, or number of steps
+    var t = step, // time, or current step
+      b = start, // start value
+      c = end - start, // total change in value
+      d = numSteps + 1; // duration, or number of steps
 
-		return easingFunction(t, b, c, d);
-	},
+    return easingFunction(t, b, c, d);
+  },
 
-	blend : function(start, end, numSteps, easingFunction) {
-		if(easingFunction == undefined) easingFunction  = Easing.none;
+  blend : function(start, end, numSteps, easingFunction) {
+    if(easingFunction == undefined) easingFunction  = Easing.none;
 
-		numSteps = Math.abs(numSteps);
+    numSteps = Math.abs(numSteps);
 
-		var i = 0;
-			n = numSteps + 1, // duration, or number of steps
-			steps = [];
+    var i = 0;
+      n = numSteps + 1, // duration, or number of steps
+      steps = [];
 
-		while(i<=n) {
-			steps.push (
-				Interpolator.interpolate(start, end, numSteps, i, easingFunction)
-			);
-			i++;
-		}
+    while(i<=n) {
+      steps.push (
+        Interpolator.interpolate(start, end, numSteps, i, easingFunction)
+      );
+      i++;
+    }
 
-		return steps;
-	}
+    return steps;
+  }
 }
 function Broadcaster()
 {
-	// private vars
-	var _listeners = [];
+  // private vars
+  var _listeners = [];
 
-	// privileged methods
+  // privileged methods
 
-	this.addListener = function(listener, handler)
-	{
-		if(listener == undefined) {
-			// console.log(arguments.callee.caller.toString());
-			throw new Error();
-		}
-		else if(!(handler instanceof Function)) {
-			// console.log(arguments.callee.caller.toString());
-			throw new Error();
-		}
-		_listeners.push ({
-			listener : listener,
-			handler  : handler
-		});
-		return this;
-	}
+  this.addListener = function(listener, handler)
+  {
+    if(listener == undefined) {
+      // console.log(arguments.callee.caller.toString());
+      throw new Error();
+    }
+    else if(!(handler instanceof Function)) {
+      // console.log(arguments.callee.caller.toString());
+      throw new Error();
+    }
+    _listeners.push ({
+      listener : listener,
+      handler  : handler
+    });
+    return this;
+  }
 
-	this.removeListener = function(listener, handler)
-	{
-		var a = _listeners, i = _listeners.length;
-		while(i--)
-		{
-			o = a[i];
-			if(o.listener == listener && o.handler == handler)
-			{
-				a.splice(i,1);
-			}
-		}
-		return this;
-	}
+  this.removeListener = function(listener, handler)
+  {
+    var a = _listeners, i = _listeners.length;
+    while(i--)
+    {
+      o = a[i];
+      if(o.listener == listener && o.handler == handler)
+      {
+        a.splice(i,1);
+      }
+    }
+    return this;
+  }
 
-	this.hasListener = function(listener, handler)
-	{
-		var i = _listeners.length;
-		while(i--)
-		{
-			o = _listeners[i];
-			if(o.listener == listener && o.handler == handler)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
+  this.hasListener = function(listener, handler)
+  {
+    var i = _listeners.length;
+    while(i--)
+    {
+      o = _listeners[i];
+      if(o.listener == listener && o.handler == handler)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
 
-	this.listeners = function() {
-		return _listeners.splice(0);
-	}
+  this.listeners = function() {
+    return _listeners.splice(0);
+  }
 
-	this.broadcast = function(e) {
-		if(!(e instanceof Event))
-		{
-			throw new Error();
-		}
+  this.broadcast = function(e) {
+    if(!(e instanceof Event))
+    {
+      throw new Error();
+    }
 
-		var i = _listeners.length;
-		var o;
-		while(i--)
-		{
-			o = _listeners[i];
-			o.handler.call(o.listener, e);
-		}
+    var i = _listeners.length;
+    var o;
+    while(i--)
+    {
+      o = _listeners[i];
+      o.handler.call(o.listener, e);
+    }
 
-		return this;
-	}
+    return this;
+  }
 
-	return this;
+  return this;
 }
 function Event(source, data)
 {

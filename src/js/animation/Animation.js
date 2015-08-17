@@ -123,7 +123,7 @@ function Animation(start, end, duration, easingFunction) {
 
   this.nextFrame = function(repeat)
   {
-  	if(repeat) _animationFrameID = requestAnimationFrame(this.nextFrame);
+  	if(repeat) _animationFrameID = requestAnimationFrame(this.nextFrame.bind(this));
 
     this.currentFrame(_currentFrame + 1);
 
@@ -138,7 +138,7 @@ function Animation(start, end, duration, easingFunction) {
 
   this.prevFrame = function()
   {
-  	if(repeat) _animationFrameID = requestAnimationFrame(this.prevFrame);
+  	if(repeat) _animationFrameID = requestAnimationFrame(this.nextFrame.bind(this));
 
     this.currentFrame(_currentFrame - 1);
 
