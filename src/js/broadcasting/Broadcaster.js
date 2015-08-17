@@ -55,7 +55,7 @@ function Broadcaster()
   }
 
   this.broadcast = function(e) {
-    if(!(e instanceof Event))
+    if(!(e instanceof Signal))
     {
       throw new Error();
     }
