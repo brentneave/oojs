@@ -1,56 +1,75 @@
-function Drag(element, options)
-{
+function Drag(element, options) {
+
   // private vars
-  var _element,
+
+  var that = this,
+      _element,
       _options,
-      _startx,
-      _starty,
       _pointerx,
       _pointery,
-      _translatex,
-      _translatey;
+      _translatex = 0,
+      _translatey = 0;
+
+  // broadcasters
+
+  this.onStartDrag = new Broadcaster();
+  this.onDrag      = new Broadcaster();
+  this.onEndDrag   = new Broadcaster();
 
   // private methods
+
   var _startDragAt = function(x, y) {
-    _startx = _pointerx = x;
-    _starty = _pointery = y;
+    _pointerx = x;
+    _pointery = y;
+    that.onStartDrag.broadcast(new Signal(this, { x: _pointerx, y: _pointery }));
   }
 
   var _dragTo = function(x, y) {
+    _translatex += x - _pointerx;
+    _translatey += y - _pointery;
     _pointerx = x;
     _pointery = y;
-    _translatex = _pointerx - _startx;
-    _translatey = _pointery - _starty;
 
     _element.style.transform =
-    _element.style.webkitTransform = 'translate3d(' + _translatex + 'px, ' + _translatey + 'px, 0)';
+    _element.style.webkitTransform =
+    'translate3d(' + _translatex + 'px, ' + _translatey + 'px, 0)';
+
+    that.onDrag.broadcast(new Signal(this, { x: _pointerx, y: _pointery }));
   }
+
   var _endDrag = function() {
+    that.onDrag.broadcast(new Signal(this, { x: _pointerx, y: _pointery }));
   }
 
   // mouse handlers
+
   var _handleMouseDown = function(e) {
     _startDragAt(e.screenX, e.screenY);
     window.addEventListener('mousemove', _handleMouseMove, false);
   }
+
   var _handleMouseMove = function(e) {
     _dragTo(e.screenX, e.screenY);
   }
+
   var _handleMouseUp = function(e) {
     window.removeEventListener('mousemove', _handleMouseMove);
     _endDrag();
   }
 
   // touch handlers
+
   var _handleTouchStart = function(e) {
     e.stopPropagation();
     _startDragAt(e.targetTouches[0].screenX, e.targetTouches[0].screenY);
     window.addEventListener('touchmove', _handleTouchMove, false);
   }
+
   var _handleTouchMove = function(e) {
     e.stopPropagation();
     _dragTo(e.changedTouches[0].screenX, e.changedTouches[0].screenY);
   }
+
   var _handleTouchEnd = function(e) {
     e.stopPropagation();
     window.removeEventListener('touchmove', _handleTouchMove);
@@ -58,6 +77,7 @@ function Drag(element, options)
   }
 
   // privileged methods
+
   this.enableDrag = function() {
     // for mice
     _element.addEventListener('mousedown', _handleMouseDown, false);
@@ -69,6 +89,7 @@ function Drag(element, options)
 
 
   // getter/setters
+  // 
   this.element = function(element) {
       if(element instanceof HTMLElement) {
       _element = element;
