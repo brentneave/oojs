@@ -1,17 +1,19 @@
-function Translate2D(element, x, y) {
+function Translate3d(element, x, y, z) {
 
   // private vars
 
   var that = this,
       _element,
       _x = 0,
-      _y = 0;
+      _y = 0,
+      _z = 0;
 
   // broadcasters
 
   this.onSetElement = new Broadcaster();
   this.onSetX       = new Broadcaster();
   this.onSetY       = new Broadcaster();
+  this.onSetZ       = new Broadcaster();
 
   // private methods
 
@@ -23,13 +25,13 @@ function Translate2D(element, x, y) {
 
     if(_element.style.webkitTransform) {
       transform = _element.style.webkitTransform;
-      indexA = transform.indexOf('translate(');
+      indexA = transform.indexOf('translate3d(');
       indexB = transform.indexOf(')', indexA) + 1;
       transform = transform.slice(0, indexA) + transform.slice(indexB);
       _element.style.webkitTransform = transform;
     }
 
-    transform = ' translate(' + _x + 'px, ' + _y + 'px)';
+    transform = ' translate3d(' + _x + 'px, ' + _y + 'px, ' + _z + 'px)';
 
     _element.style.webkitTransform += transform;
   }
@@ -54,8 +56,8 @@ function Translate2D(element, x, y) {
   this.x = function(n) {
     if(parseFloat(n) === n) {
       _x = n;
-      that.onSetX.broadcast(new Signal(this, { x: _x }));
       _render();
+      this.onSetX.broadcast(new Signal(this, { x: _x }));
       return this;
     }
     else if (arguments.length) {
@@ -67,8 +69,8 @@ function Translate2D(element, x, y) {
   this.y = function(n) {
     if(parseFloat(n) === n) {
       _y = n;
-      this.onSetY.broadcast(new Signal(this, { y: _y }));
       _render();
+      this.onSetY.broadcast(new Signal(this, { y: _y }));
       return this;
     }
     else if (arguments.length) {
@@ -77,28 +79,44 @@ function Translate2D(element, x, y) {
     return _y;
   }
 
-  this.xy = function(x, y) {
-    if(parseFloat(x) === x && parseFloat(y) === y) {
-      _x = x;
-      _y = y;
-      this.onSetX.broadcast(new Signal(this, { x: _x }));
-      this.onSetY.broadcast(new Signal(this, { y: _y }));
+  this.z = function(n) {
+    if(parseFloat(n) === n) {
+      _z = n;
       _render();
+      this.onSetZ.broadcast(new Signal(this, { z: _z }));
       return this;
     }
     else if (arguments.length) {
       throw new Error();
     }
-    return {x: _x, y: _y}
+    return _z;
+  }
+
+  this.xyz = function(x, y, z) {
+    if(parseFloat(x) === x && parseFloat(y) === y && parseFloat(z) === z) {
+      _x = x;
+      _y = y;
+      _z = z;
+      _render();
+      this.onSetX.broadcast(new Signal(this, { x: _x }));
+      this.onSetY.broadcast(new Signal(this, { y: _y }));
+      this.onSetZ.broadcast(new Signal(this, { z: _z }));
+      return this;
+    }
+    else if (arguments.length) {
+      throw new Error();
+    }
+    return {x: _x, y: _y, z: _z}
   }
 
   // initialise it
   x = x != undefined ? x : 0;
   y = y != undefined ? y : 0;
-  if(element) this.element(element).x(x).y(y);
+  z = z != undefined ? z : 0;
+  if(element) this.element(element).xyz(x, y, z);
 
 }
 
-Translate2D.prototype.toString = function() {
-  return '[Translate2D]';
+Translate3d.prototype.toString = function() {
+  return '[Translate3d]';
 }

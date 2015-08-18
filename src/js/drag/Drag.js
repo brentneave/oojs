@@ -9,7 +9,7 @@ function Drag(element, options) {
       _lastpointery,
       _translatex = 0,
       _translatey = 0,
-      _transform = new Translate2D(),
+      _transform = new Translate3d(),
       _animationx = new Animation(),
       _animationy = new Animation(),
       _animationxBinding = new AnimationBinding(_animationx, _transform, _transform.x),
@@ -50,9 +50,10 @@ function Drag(element, options) {
 
   var _dragTo = function(x, y) {
 
-    _transform.xy(
+    _transform.xyz(
       _transform.x() + (x - _pointerx),
-      _transform.y() + (y - _pointery)
+      _transform.y() + (y - _pointery),
+      0
     );
 
     _lastpointerx = _pointerx,
