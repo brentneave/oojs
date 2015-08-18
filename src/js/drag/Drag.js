@@ -1,15 +1,27 @@
-function Drag(element, classNameWhileDragging) {
+function Drag(element, options) {
 
   // private vars
 
   var that = this,
-      _element,
-      _options,
       _pointerx,
       _pointery,
+      _lastpointerx,
+      _lastpointery,
       _translatex = 0,
       _translatey = 0,
-      _draggingClassName;
+      _transform = new Translate2D(),
+      _animationx = new Animation(),
+      _animationy = new Animation(),
+      _animationxBinding = new AnimationBinding(_animationx, _transform, _transform.x),
+      _animationyBinding = new AnimationBinding(_animationy, _transform, _transform.y),
+
+      // params
+
+      _element,
+      _momentum = 0,
+      _momentumTimeFactor = 2,
+      _easingFunction = Easing.easeOutCubic,
+      _classNameWhileDragging;
 
   // broadcasters
 
@@ -21,29 +33,60 @@ function Drag(element, classNameWhileDragging) {
   // private methods
 
   var _startDragAt = function(x, y) {
+
+    _animationx.pause();
+    _animationy.pause();
+
     _pointerx = x;
     _pointery = y;
 
-    if(_draggingClassName) _element.classList.add(_draggingClassName);
+    _translatex = _transform.x();
+    _translatey = _transform.y();
+
+    if(_classNameWhileDragging) _element.classList.add(_classNameWhileDragging);
 
     that.onStartDrag.broadcast(new Signal(this, { x: _pointerx, y: _pointery }));
   }
 
   var _dragTo = function(x, y) {
-    _translatex += x - _pointerx;
-    _translatey += y - _pointery;
+
+    _transform.xy(
+      _transform.x() + (x - _pointerx),
+      _transform.y() + (y - _pointery)
+    );
+
+    _lastpointerx = _pointerx,
+    _lastpointery = _pointery,
     _pointerx = x;
     _pointery = y;
-
-    _element.style.transform =
-    _element.style.webkitTransform = 'translate3d(' + _translatex + 'px, ' + _translatey + 'px, 0)';
 
     that.onDrag.broadcast(new Signal(this, { x: _pointerx, y: _pointery }));
   }
 
   var _endDrag = function() {
-    _element.classList.remove(_draggingClassName);
-    that.onDrag.broadcast(new Signal(this, { x: _pointerx, y: _pointery }));
+
+    _element.classList.remove(_classNameWhileDragging);
+
+    var xend = (_pointerx - _lastpointerx) * _momentum,
+        yend = (_pointery - _lastpointery) * _momentum,
+        duration = _momentumTimeFactor * Math.sqrt((xend * xend) + (yend * yend));
+
+    _animationx.easingFunction(_easingFunction);
+    _animationy.easingFunction(_easingFunction);
+
+    _animationx.startValue(_transform.x());
+    _animationy.startValue(_transform.y());
+
+    _animationx.endValue(_transform.x() + xend);
+    _animationy.endValue(_transform.y() + yend);
+
+    _animationx.duration(duration);
+    _animationy.duration(duration);
+
+    _animationx.rewind().play();
+    _animationy.rewind().play();
+
+    that.onEndDrag.broadcast(new Signal(this, { x: _pointerx, y: _pointery }));
   }
 
   // mouse handlers
@@ -89,7 +132,7 @@ function Drag(element, classNameWhileDragging) {
     window.addEventListener('mouseup', _handleMouseUp, false);
     // for fingers
     _element.addEventListener('touchstart', _handleTouchStart, false);
-    _element.addEventListener('touchend', _handleTouchEnd, false);
+    window.addEventListener('touchend', _handleTouchEnd, false);
   }
 
 
@@ -98,6 +141,7 @@ function Drag(element, classNameWhileDragging) {
   this.element = function(element) {
       if(element instanceof HTMLElement) {
       _element = element;
+      _transform.element(_element);
       this.onSetElement.broadcast(new Signal(this, { element: _element }));
       this.enableDrag();
       return this;
@@ -110,19 +154,50 @@ function Drag(element, classNameWhileDragging) {
 
   this.classNameWhileDragging = function(s) {
       if(s.toString() === s) {
-      _draggingClassName = s;
+      _classNameWhileDragging = s;
       return this;
     }
     else if (arguments.length) {
       throw new Error();
     }
-    return _draggingClassName;
+    return _classNameWhileDragging;
+  }
+
+  this.momentum = function(n) {
+      if(parseFloat(n) === n) {
+      _momentum = n;
+      console.log('momentum = ' + _momentum);
+      return this;
+    }
+    else if (arguments.length) {
+      throw new Error();
+    }
+    return _momentum;
+  }
+
+  this.easingFunction = function(f) {
+    if(arguments.length) {
+      if(f instanceof Function) {
+        _easingFunction = f;
+        return this;
+      }
+      else { throw new Error(); }
+    }
+
+    return _easingFunction;
   }
 
   // initialise it
-
-  if(classNameWhileDragging) this.classNameWhileDragging(classNameWhileDragging);
-  if(element) this.element(element);
+  if(options.classNameWhileDragging) {
+    this.classNameWhileDragging(options.classNameWhileDragging);
+  }
+  if(options.momentum) {
+    this.momentum(options.momentum);
+  }
+  if(options.easingFunction) {
+    this.easingFunction(options.easingFunction);
+  }
+  this.element(element);
 
 }
 

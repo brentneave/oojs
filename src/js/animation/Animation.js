@@ -1,10 +1,5 @@
 function Animation(start, end, duration, easingFunction) {
 
-  if(start     !== parseFloat(start))         { throw new Error(); }
-  if(end       !== parseFloat(end))           { throw new Error(); }
-  if(duration  !== parseFloat(duration))      { throw new Error(); }
-  if(!(easingFunction instanceof Function))   { throw new Error(); }
-
   var that = this,
     _animationFrameID,
     _currentFrame = 0,
@@ -179,6 +174,16 @@ function Animation(start, end, duration, easingFunction) {
     return _end;
   }
 
+  this.duration = function(n)  {
+    if(!isNaN(n)) {
+      _duration = n;
+      _recalculate();
+      return this;
+    }
+    else if (arguments.length) throw new Error();
+    return _end;
+  }
+
   this.easingFunction = function(f) {
     if(arguments.length) {
       if(f instanceof Function) {
@@ -191,6 +196,12 @@ function Animation(start, end, duration, easingFunction) {
 
     return _easingFunction;
   }
+
+
+  if(start          != undefined) this.startValue(start);
+  if(end            != undefined) this.endValue(end);
+  if(duration       != undefined) this.duration(duration);
+  if(easingFunction != undefined) this.easingFunction(easingFunction);
 
   return this;
 }
