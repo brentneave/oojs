@@ -535,7 +535,7 @@ function Drag(element, options) {
       // params
 
       _element,
-      _momentum = 0,
+      _momentum = 7,
       _momentumTimeFactor = 2,
       _easingFunction = Easing.easeOutCubic,
       _classNameWhileDragging;
