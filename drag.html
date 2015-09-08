@@ -39,7 +39,9 @@
 var dragger = new Drag(
   document.querySelector('.message'),
   {
-    classNameWhileDragging: 'is-dragging'
+    classNameWhileDragging: 'is-dragging',
+    xSnap: 300,
+    ySnap: 300
   }
 );
 </script>

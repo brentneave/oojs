@@ -14,9 +14,10 @@ function Drag(element, options) {
       _animationy = new Animation(),
       _animationxBinding = new AnimationBinding(_animationx, _transform, _transform.x),
       _animationyBinding = new AnimationBinding(_animationy, _transform, _transform.y),
+      _xsnap = undefined,
+      _ysnap = undefined,
 
       // params
-
       _element,
       _momentum = 7,
       _momentumTimeFactor = 2,
@@ -68,9 +69,22 @@ function Drag(element, options) {
 
     _element.classList.remove(_classNameWhileDragging);
 
-    var xend = (_pointerx - _lastpointerx) * _momentum,
-        yend = (_pointery - _lastpointery) * _momentum,
-        duration = _momentumTimeFactor * Math.sqrt((xend * xend) + (yend * yend));
+    var xdrift = ((_pointerx - _lastpointerx) * _momentum),
+        ydrift = ((_pointery - _lastpointery) * _momentum),
+        xend = _transform.x() + xdrift,
+        yend = _transform.y() + ydrift,
+        xchange,
+        ychange,
+        duration;
+
+    if(xend > _transform.x() && _xsnap != undefined) { xend = Math.ceil (xend / _xsnap) * _xsnap } else
+    if(xend < _transform.x() && _xsnap != undefined) { xend = Math.floor(xend / _xsnap) * _xsnap };
+    if(yend > _transform.y() && _ysnap != undefined) { yend = Math.ceil (yend / _ysnap) * _ysnap } else
+    if(yend < _transform.y() && _ysnap != undefined) { yend = Math.floor(yend / _ysnap) * _ysnap };
+
+    xchange = xend - _transform.x();
+    ychange = yend - _transform.y();
+    duration = _momentumTimeFactor * Math.sqrt((xchange * xchange) + (ychange * ychange));
 
     _animationx.easingFunction(_easingFunction);
     _animationy.easingFunction(_easingFunction);
@@ -78,8 +92,8 @@ function Drag(element, options) {
     _animationx.startValue(_transform.x());
     _animationy.startValue(_transform.y());
 
-    _animationx.endValue(_transform.x() + xend);
-    _animationy.endValue(_transform.y() + yend);
+    _animationx.endValue(xend);
+    _animationy.endValue(yend);
 
     _animationx.duration(duration);
     _animationy.duration(duration);
@@ -188,6 +202,28 @@ function Drag(element, options) {
     return _easingFunction;
   }
 
+  this.xSnap = function(n) {
+      if(parseFloat(n) === n) {
+      _xsnap = n;
+      return this;
+    }
+    else if (arguments.length) {
+      throw new Error();
+    }
+    return _xsnap;
+  }
+
+  this.ySnap = function(n) {
+      if(parseFloat(n) === n) {
+      _ysnap = n;
+      return this;
+    }
+    else if (arguments.length) {
+      throw new Error();
+    }
+    return _ysnap;
+  }
+
   // initialise it
   if(options.classNameWhileDragging) {
     this.classNameWhileDragging(options.classNameWhileDragging);
@@ -197,6 +233,12 @@ function Drag(element, options) {
   }
   if(options.easingFunction) {
     this.easingFunction(options.easingFunction);
+  }
+  if(options.xSnap) {
+    this.xSnap(options.xSnap);
+  }
+  if(options.ySnap) {
+    this.xSnap(options.ySnap);
   }
   this.element(element);
 
