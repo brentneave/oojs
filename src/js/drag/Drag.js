@@ -16,6 +16,8 @@ function Drag(element, options) {
       _animationyBinding = new AnimationBinding(_animationy, _transform, _transform.y),
       _xsnap = undefined,
       _ysnap = undefined,
+      _horizontal = true,
+      _vertical = true,
 
       // params
       _element,
@@ -34,7 +36,6 @@ function Drag(element, options) {
   // private methods
 
   var _startDragAt = function(x, y) {
-
     _animationx.pause();
     _animationy.pause();
 
@@ -50,12 +51,13 @@ function Drag(element, options) {
   }
 
   var _dragTo = function(x, y) {
+    if(_horizontal) {
+      _transform.x(_transform.x() + (x - _pointerx));
+    }
 
-    _transform.xyz(
-      _transform.x() + (x - _pointerx),
-      _transform.y() + (y - _pointery),
-      0
-    );
+    if(_vertical) {
+      _transform.y(_transform.y() + (y - _pointery));
+    }
 
     _lastpointerx = _pointerx,
     _lastpointery = _pointery,
@@ -73,33 +75,40 @@ function Drag(element, options) {
         ydrift = ((_pointery - _lastpointery) * _momentum),
         xend = _transform.x() + xdrift,
         yend = _transform.y() + ydrift,
-        xchange,
-        ychange,
+        xchange = 0,
+        ychange = 0,
         duration;
 
-    if(xend > _transform.x() && _xsnap != undefined) { xend = Math.ceil (xend / _xsnap) * _xsnap } else
-    if(xend < _transform.x() && _xsnap != undefined) { xend = Math.floor(xend / _xsnap) * _xsnap };
-    if(yend > _transform.y() && _ysnap != undefined) { yend = Math.ceil (yend / _ysnap) * _ysnap } else
-    if(yend < _transform.y() && _ysnap != undefined) { yend = Math.floor(yend / _ysnap) * _ysnap };
+    if(_horizontal) {
+      if(xend > _transform.x() && _xsnap != undefined) { xend = Math.ceil (xend / _xsnap) * _xsnap } else
+      if(xend < _transform.x() && _xsnap != undefined) { xend = Math.floor(xend / _xsnap) * _xsnap };
+      xchange = xend - _transform.x();
+    }
+    if(_horizontal) {
+      if(yend > _transform.y() && _ysnap != undefined) { yend = Math.ceil (yend / _ysnap) * _ysnap } else
+      if(yend < _transform.y() && _ysnap != undefined) { yend = Math.floor(yend / _ysnap) * _ysnap };
+      ychange = yend - _transform.y();
+    }
 
-    xchange = xend - _transform.x();
-    ychange = yend - _transform.y();
     duration = _momentumTimeFactor * Math.sqrt((xchange * xchange) + (ychange * ychange));
+console.log(xend);
+    if(_horizontal) {
+      _animationx
+        .easingFunction(_easingFunction)
+        .startValue(_transform.x())
+        .endValue(xend)
+        .duration(duration)
+        .rewind().play()
+    }
 
-    _animationx.easingFunction(_easingFunction);
-    _animationy.easingFunction(_easingFunction);
-
-    _animationx.startValue(_transform.x());
-    _animationy.startValue(_transform.y());
-
-    _animationx.endValue(xend);
-    _animationy.endValue(yend);
-
-    _animationx.duration(duration);
-    _animationy.duration(duration);
-
-    _animationx.rewind().play();
-    _animationy.rewind().play();
+    if(_vertical) {
+      _animationy
+        .easingFunction(_easingFunction)
+        .startValue(_transform.y())
+        .endValue(yend)
+        .duration(duration)
+        .rewind().play()
+    }
 
     that.onEndDrag.broadcast(new Signal(this, { x: _pointerx, y: _pointery }));
   }
@@ -224,6 +233,28 @@ function Drag(element, options) {
     return _ysnap;
   }
 
+  this.vertical = function(b) {
+    if(b === true || b === false) {
+      _vertical = b;
+      return this;
+    }
+    else if (arguments.length) {
+      throw new Error();
+    }
+    return _vertical;
+  }
+
+  this.horizontal = function(b) {
+    if(b === true || b === false) {
+      _horizontal = b;
+      return this;
+    }
+    else if (arguments.length) {
+      throw new Error();
+    }
+    return _horizontal;
+  }
+
   // initialise it
   if(options.classNameWhileDragging) {
     this.classNameWhileDragging(options.classNameWhileDragging);
@@ -238,7 +269,13 @@ function Drag(element, options) {
     this.xSnap(options.xSnap);
   }
   if(options.ySnap) {
-    this.xSnap(options.ySnap);
+    this.ySnap(options.ySnap);
+  }
+  if(options.vertical != undefined) {
+    this.vertical(options.vertical);
+  }
+  if(options.horizontal != undefined) {
+    this.vertical(options.horizontal);
   }
   this.element(element);
 
